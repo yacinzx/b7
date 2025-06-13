@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>B7 MOYENNE</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      color: white;
+      background: linear-gradient(120deg, #1e1e1e, #101010);
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: url('https://media.githubusercontent.com/media/ManzDev/codevember2017/master/assets/waves.svg') repeat-x;
+      background-size: cover;
+      opacity: 0.07;
+      animation: wave 20s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes wave {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .container {
+      max-width: 95%;
+      margin: 30px auto;
+      background: rgba(255, 255, 255, 0.07);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 25px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    h1 {
+      color: #00bfff;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      margin-top: 15px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+
+    th, td {
+      padding: 10px;
+      font-size: 0.95rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      background-color: rgba(0,0,0,0.3);
+      color: #00bfff;
+    }
+
+    input[type="number"], input[type="text"] {
+      width: 70px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.5),
+                  inset -2px -2px 4px rgba(255, 255, 255, 0.1);
+      transition: 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 5px #00bfff;
+    }
+
+    .readonly {
+      color: #aaa;
+    }
+
+    .btn {
+      margin: 10px 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    }
+
+    .btn-calc {
+      background-color: #28a745;
+      color: white;
+    }
+
+    .btn-save {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .btn-download {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .avg-red {
+      color: red;
+      font-weight: bold;
+    }
+
+    .avg-green {
+      color: #00ff7f;
+      font-weight: bold;
+    }
+
+    .name-fields {
+      margin-bottom: 15px;
+    }
+
+    .name-fields input {
+      margin: 0 10px;
+      width: 150px;
+    }
+
+    @media (max-width: 600px) {
+      input[type="number"], input[type="text"] {
+        width: 50px;
+      }
+
+      .name-fields input {
+        width: 100px;
+        margin: 5px;
+      }
+
+      th, td {
+        font-size: 0.7rem;
+        padding: 4px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="capture">
+    <h1>B7 Moyenne</h1>
+    <div class="name-fields">
+      <input type="text" id="nom" placeholder="Nom">
+      <input type="text" id="prenom" placeholder="Prénom">
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Module</th><th>TP</th><th>TD</th><th>Examen</th><th>Moyenne</th>
+        </tr>
+      </thead>
+      <tbody id="table-body">
+        <!-- Rempli dynamiquement -->
+      </tbody>
+    </table>
+
+    <h3>Moyenne Générale: <span id="final-average">-</span></h3>
+
+    <button class="btn btn-calc" onclick="calculer()">Calculer</button>
+    <button class="btn btn-save" onclick="save()">Sauvegarder</button>
+    <button class="btn btn-download" onclick="telecharger()">Télécharger PDF</button>
+  </div>
+
+  <script>
+    const modules = [
+      { nom: "Algèbre 2", coef: 3, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Électricité", coef: 3, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Anglais 1", coef: 2, hasTP: false, hasTD: false, weights: { exam: 1 } },
+      { nom: "Electronique", coef: 4, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Analyse 2", coef: 5, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Algo 2", coef: 5, hasTP: true, hasTD: true, weights: { tp: 0.2, td: 0.2, exam: 0.6 } },
+      { nom: "SE 2", coef: 3, hasTP: true, hasTD: false, weights: { tp: 0.4, exam: 0.6 } }
+    ];
+
+    function createTable() {
+      let html = "";
+      modules.forEach((mod, i) => {
+        html += `<tr>
+          <td>${mod.nom}</td>
+          <td>${mod.hasTP ? `<input type="number" min="0" max="20" id="tp${i}">` : `<span class="readonly">-</span>`}</td>
+          <td>${mod.hasTD ? `<input type="number" min="0" max="20" id="td${i}">` : `<span class="readonly">-</span>`}</td>
+          <td><input type="number" min="0" max="20" id="exam${i}"></td>
+          <td id="avg${i}">-</td>
+        </tr>`;
+      });
+      document.getElementById("table-body").innerHTML = html;
+    }
+
+    function calculer() {
+      let total = 0, coefSum = 0;
+      modules.forEach((mod, i) => {
+        let tp = mod.hasTP ? parseFloat(document.getElementById("tp" + i).value || 0) : 0;
+        let td = mod.hasTD ? parseFloat(document.getElementById("td" + i).value || 0) : 0;
+        let exam = parseFloat(document.getElementById("exam" + i).value || 0);
+
+        let moyenne = 0;
+        if (mod.hasTP) moyenne += mod.weights.tp * tp;
+        if (mod.hasTD) moyenne += mod.weights.td * td;
+        moyenne += mod.weights.exam * exam;
+
+        total += moyenne * mod.coef;
+        coefSum += mod.coef;
+
+        const avgCell = document.getElementById("avg" + i);
+        avgCell.innerText = moyenne.toFixed(2);
+        avgCell.className = moyenne >= 10 ? "avg-green" : "avg-red";
+      });
+
+      const finalAvg = total / coefSum;
+      const finalAvgEl = document.getElementById("final-average");
+      finalAvgEl.innerText = finalAvg.toFixed(2);
+      finalAvgEl.className = finalAvg >= 10 ? "avg-green" : "avg-red";
+    }
+
+    function save() {
+      const data = {
+        nom: document.getElementById("nom").value,
+        prenom: document.getElementById("prenom").value,
+        notes: modules.map((mod, i) => ({
+          tp: mod.hasTP ? document.getElementById("tp" + i).value : "-",
+          td: mod.hasTD ? document.getElementById("td" + i).value : "-",
+          exam: document.getElementById("exam" + i).value,
+        }))
+      };
+      localStorage.setItem("moyenneData", JSON.stringify(data));
+      alert("Données sauvegardées !");
+    }
+
+    function restore() {
+      const data = JSON.parse(localStorage.getItem("moyenneData"));
+      if (!data) return;
+
+      document.getElementById("nom").value = data.nom || "";
+      document.getElementById("prenom").value = data.prenom || "";
+
+      data.notes.forEach((note, i) => {
+        if (modules[i].hasTP) document.getElementById("tp" + i).value = note.tp || "";
+        if (modules[i].hasTD) document.getElementById("td" + i).value = note.td || "";
+        document.getElementById("exam" + i).value = note.exam || "";
+      });
+      calculer();
+    }
+
+    async function telecharger() {
+      calculer();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 20;
+      doc.setFontSize(14);
+      doc.text(`Nom: ${document.getElementById("nom").value}`, 10, y);
+      doc.text(`Prénom: ${document.getElementById("prenom").value}`, 100, y);
+
+      y += 10;
+      doc.setFontSize(12);
+      modules.forEach((mod, i) => {
+        const avg = document.getElementById("avg" + i).innerText;
+        doc.text(`${mod.nom}: ${avg}`, 10, y);
+        y += 8;
+      });
+
+      y += 5;
+      doc.setFontSize(14);
+      doc.text(`Moyenne Générale: ${document.getElementById("final-average").innerText}`, 10, y);
+      doc.save("Releve_Moyenne.pdf");
+    }
+
+    createTable();
+    window.onload = restore;
+  </script>
+</body>
+</html>
