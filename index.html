@@ -3,107 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>B7 MOYENNE</title>
+  <title>B7 ECONOMIE</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
+      background: #101f10;
+      font-family: 'Segoe UI', sans-serif;
+      color: #fff;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
-      background: linear-gradient(120deg, #1e1e1e, #101010);
-      position: relative;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 200%;
-      height: 200%;
-      background: url('https://media.githubusercontent.com/media/ManzDev/codevember2017/master/assets/waves.svg') repeat-x;
-      background-size: cover;
-      opacity: 0.07;
-      animation: wave 20s linear infinite;
-      z-index: -1;
-    }
-
-    @keyframes wave {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
     }
 
     .container {
       max-width: 95%;
-      margin: 30px auto;
-      background: rgba(255, 255, 255, 0.07);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 25px;
+      margin: 20px auto;
+      background: rgba(0, 255, 0, 0.03);
+      border-radius: 10px;
+      padding: 20px;
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid #0f0;
     }
 
     h1 {
-      color: #00bfff;
-      margin-bottom: 15px;
+      color: #00ff7f;
     }
 
     table {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
+      border-collapse: collapse;
       margin-top: 15px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
     }
 
     th, td {
-      padding: 10px;
-      font-size: 0.95rem;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid #1a661a;
+      padding: 6px;
+      font-size: 0.9rem;
     }
 
     th {
-      background-color: rgba(0,0,0,0.3);
-      color: #00bfff;
+      background-color: #0c2e0c;
+      color: #00ff7f;
     }
 
     input[type="number"], input[type="text"] {
       width: 70px;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.08);
+      padding: 3px;
+      background: #1a1a1a;
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 10px;
+      border: 1px solid #00aa55;
+      border-radius: 4px;
       text-align: center;
-      box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.5),
-                  inset -2px -2px 4px rgba(255, 255, 255, 0.1);
-      transition: 0.3s ease;
-    }
-
-    input:focus {
-      outline: none;
-      background: rgba(255, 255, 255, 0.12);
-      box-shadow: 0 0 5px #00bfff;
     }
 
     .readonly {
-      color: #aaa;
+      color: #777;
     }
 
     .btn {
       margin: 10px 5px;
       padding: 10px 20px;
       border: none;
-      border-radius: 10px;
+      border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
     }
 
     .btn-calc {
@@ -132,34 +94,18 @@
     }
 
     .name-fields {
-      margin-bottom: 15px;
+      margin-bottom: 10px;
     }
 
     .name-fields input {
       margin: 0 10px;
       width: 150px;
     }
-
-    @media (max-width: 600px) {
-      input[type="number"], input[type="text"] {
-        width: 50px;
-      }
-
-      .name-fields input {
-        width: 100px;
-        margin: 5px;
-      }
-
-      th, td {
-        font-size: 0.7rem;
-        padding: 4px;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="container" id="capture">
-    <h1>B7 Moyenne</h1>
+    <h1>B7 ECONOMIE</h1>
     <div class="name-fields">
       <input type="text" id="nom" placeholder="Nom">
       <input type="text" id="prenom" placeholder="Prénom">
@@ -167,12 +113,10 @@
     <table>
       <thead>
         <tr>
-          <th>Module</th><th>TP</th><th>TD</th><th>Examen</th><th>Moyenne</th>
+          <th>Module</th><th>TD</th><th>Examen</th><th>Moyenne</th>
         </tr>
       </thead>
-      <tbody id="table-body">
-        <!-- Rempli dynamiquement -->
-      </tbody>
+      <tbody id="table-body"></tbody>
     </table>
 
     <h3>Moyenne Générale: <span id="final-average">-</span></h3>
@@ -184,14 +128,15 @@
 
   <script>
     const modules = [
-      { nom: "Algèbre 2", coef: 3, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
-      { nom: "Électricité", coef: 3, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
-      { nom: "Anglais 1", coef: 2, hasTP: false, hasTD: false, weights: { exam: 1 } },
-      { nom: "TEO", coef: 2, hasTP: false, hasTD: false, weights: { exam: 1 } },
-      { nom: "Electronique", coef: 4, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
-      { nom: "Analyse 2", coef: 5, hasTP: false, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
-      { nom: "Algo 2", coef: 5, hasTP: true, hasTD: true, weights: { tp: 0.2, td: 0.2, exam: 0.6 } },
-      { nom: "SE 2", coef: 3, hasTP: true, hasTD: false, weights: { tp: 0.4, exam: 0.6 } }
+      { nom: "Comptabilité 2", coef: 3, hasTD: true, weights: { td: 0.4, exam: 0.6  } },
+      { nom: "Macro", coef: 2, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "EE", coef: 2, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "HPE", coef: 2, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Proba", coef: 3, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Math", coef: 2, hasTD: true, weights: { td: 0.4, exam: 0.6 } },
+      { nom: "Info", coef: 1, hasTD: false, weights: { exam: 1 } },
+      { nom: "Droit com", coef: 1, hasTD: false, weights: { exam: 1 } },
+      { nom: "Langue", coef: 1, hasTD: false, weights: { exam: 1 } }
     ];
 
     function createTable() {
@@ -199,7 +144,6 @@
       modules.forEach((mod, i) => {
         html += `<tr>
           <td>${mod.nom}</td>
-          <td>${mod.hasTP ? `<input type="number" min="0" max="20" id="tp${i}">` : `<span class="readonly">-</span>`}</td>
           <td>${mod.hasTD ? `<input type="number" min="0" max="20" id="td${i}">` : `<span class="readonly">-</span>`}</td>
           <td><input type="number" min="0" max="20" id="exam${i}"></td>
           <td id="avg${i}">-</td>
@@ -211,12 +155,10 @@
     function calculer() {
       let total = 0, coefSum = 0;
       modules.forEach((mod, i) => {
-        let tp = mod.hasTP ? parseFloat(document.getElementById("tp" + i).value || 0) : 0;
         let td = mod.hasTD ? parseFloat(document.getElementById("td" + i).value || 0) : 0;
         let exam = parseFloat(document.getElementById("exam" + i).value || 0);
 
         let moyenne = 0;
-        if (mod.hasTP) moyenne += mod.weights.tp * tp;
         if (mod.hasTD) moyenne += mod.weights.td * td;
         moyenne += mod.weights.exam * exam;
 
@@ -239,7 +181,6 @@
         nom: document.getElementById("nom").value,
         prenom: document.getElementById("prenom").value,
         notes: modules.map((mod, i) => ({
-          tp: mod.hasTP ? document.getElementById("tp" + i).value : "-",
           td: mod.hasTD ? document.getElementById("td" + i).value : "-",
           exam: document.getElementById("exam" + i).value,
         }))
@@ -251,12 +192,9 @@
     function restore() {
       const data = JSON.parse(localStorage.getItem("moyenneData"));
       if (!data) return;
-
       document.getElementById("nom").value = data.nom || "";
       document.getElementById("prenom").value = data.prenom || "";
-
       data.notes.forEach((note, i) => {
-        if (modules[i].hasTP) document.getElementById("tp" + i).value = note.tp || "";
         if (modules[i].hasTD) document.getElementById("td" + i).value = note.td || "";
         document.getElementById("exam" + i).value = note.exam || "";
       });
@@ -271,7 +209,6 @@
       doc.setFontSize(14);
       doc.text(`Nom: ${document.getElementById("nom").value}`, 10, y);
       doc.text(`Prénom: ${document.getElementById("prenom").value}`, 100, y);
-
       y += 10;
       doc.setFontSize(12);
       modules.forEach((mod, i) => {
@@ -279,7 +216,6 @@
         doc.text(`${mod.nom}: ${avg}`, 10, y);
         y += 8;
       });
-
       y += 5;
       doc.setFontSize(14);
       doc.text(`Moyenne Générale: ${document.getElementById("final-average").innerText}`, 10, y);
